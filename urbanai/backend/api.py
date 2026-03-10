@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from tensorflow.keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
+import pickle
 
 from route_junction_mapper import get_route_junctions
 
@@ -16,6 +17,7 @@ from route_junction_mapper import get_route_junctions
 BASE_DIR = Path(__file__).resolve().parent
 DATA_CSV_PATH = BASE_DIR / "datasets" / "mumbai_traffic_lstm_ready.csv"
 MODEL_PATH = BASE_DIR / "lstm_traffic_model.keras"
+PARKING_MODEL_PATH = BASE_DIR / "parking_model.pkl"
 
 # These should match the training script
 SEQ_LEN = 16
@@ -58,6 +60,7 @@ _scaler_X = None
 _scaler_y = None
 _features = None
 _df_model = None
+_parking_model = None
 
 
 def _load_assets():
@@ -140,7 +143,7 @@ def _load_assets():
     FEATURES = [f for f in FEATURES if f in df.columns]
     _features = FEATURES
 
-    df_model = df[FEATURES + [TARGET]].dropna().reset_index(drop=True)
+    df_model = df[["datetime"] + FEATURES + [TARGET]].dropna().reset_index(drop=True)
     _df_model = df_model
 
     # Temporal split as in training; we fit scalers on train portion
@@ -179,11 +182,10 @@ def _make_sequences(X: np.ndarray, seq_len: int):
     return np.array(Xs)
 
 
-def _predict_for_junction_id(junction_id: Optional[int] = None) -> float:
+def _predict_for_junction_id(junction_id: Optional[int] = None, departure_time: str = "08:00") -> float:
     """
-    Demo-style prediction: take the most recent SEQ_LEN rows for a
-    given junction_id (or all junctions) and predict the next step
-    congestion_index.
+    Demo-style prediction: take historical window from _df_model
+    that best matches the given departure_time.
     """
     _load_assets()
 
@@ -194,16 +196,71 @@ def _predict_for_junction_id(junction_id: Optional[int] = None) -> float:
     if len(df) <= SEQ_LEN:
         raise RuntimeError("Not enough historical rows for the selected junction.")
 
-    X_raw = df[_features].values
+    # Try to match the time of day, otherwise fall back to the end of the dataset
+    import datetime
+    try:
+        hr_str, mn_str = departure_time.split(":")
+        hr = int(hr_str)
+        mn = int(round(int(mn_str) / 15.0) * 15)
+        if mn == 60:
+            hr = (hr + 1) % 24
+            mn = 0
+            
+        target_time = datetime.time(hr, mn)
+        
+        # Find indices where time matches target_time
+        time_matches = df[df["datetime"].dt.time == target_time].index
+        
+        # We need at least SEQ_LEN rows BEFORE the match to form the window
+        valid_matches = [idx for idx in time_matches if idx >= SEQ_LEN - 1]
+        
+        if valid_matches:
+            # The sequence ends AT the target time (inclusive)
+            end_idx = valid_matches[-1] + 1
+        else:
+            end_idx = len(df)
+    except Exception:
+        end_idx = len(df)
+
+    # Extract historical window ending at end_idx
+    start_idx = end_idx - SEQ_LEN
+    window_df = df.iloc[start_idx:end_idx]
+
+    X_raw = window_df[_features].values
     X_scaled = _scaler_X.transform(X_raw)
 
-    X_seq = _make_sequences(X_scaled, SEQ_LEN)
-    # Use only the last window
-    input_seq = X_seq[-1].reshape(1, SEQ_LEN, len(_features))
+    input_seq = X_scaled.reshape(1, SEQ_LEN, len(_features))
 
     pred_scaled = _model.predict(input_seq, verbose=0)
     pred = _scaler_y.inverse_transform(pred_scaled)[0][0]
     return float(pred)
+
+
+def _predict_parking_minutes(traffic_level: int) -> Optional[int]:
+    """
+    Use the parking_model.pkl if available to estimate minutes
+    to find parking, given current traffic level.
+    Falls back to None on any error, so callers can use a heuristic.
+    """
+    global _parking_model
+
+    if _parking_model is None:
+        if not PARKING_MODEL_PATH.exists():
+            return None
+        try:
+            with open(PARKING_MODEL_PATH, "rb") as f:
+                _parking_model = pickle.load(f)
+        except Exception:
+            return None
+
+    try:
+        # Simple feature vector: traffic level as single numeric input
+        X = np.array([[float(traffic_level)]], dtype=float)
+        pred = _parking_model.predict(X)[0]
+        minutes = max(1, int(round(float(pred))))
+        return minutes
+    except Exception:
+        return None
 
 
 @app.get("/health")
@@ -232,10 +289,19 @@ def predict(req: PredictRequest):
             first = junctions[0]
             junction_id = first.get("junction_id")
             junction_label = first.get("junction_name", "")
+            
+        departure_time = req.departureTime or "08:00"
+        try:
+            hour_str, minute_str = departure_time.split(":")
+            hour = int(hour_str)
+        except Exception:
+            hour = 8
+            minute_str = "00"
+            departure_time = "08:00"
 
         # Run LSTM prediction (demo based on historical CSV)
         try:
-            congestion_value = _predict_for_junction_id(junction_id)
+            congestion_value = _predict_for_junction_id(junction_id, departure_time)
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Inference error: {e}")
 
@@ -263,40 +329,36 @@ def predict(req: PredictRequest):
         elif congestion_label == "MODERATE":
             confidence = 84
 
-        # Use departure time directly and suggest adjustment based on traffic
-        departure_time = req.departureTime or "08:00"
-        try:
-            hour_str, minute_str = departure_time.split(":")
-            hour = int(hour_str)
-        except Exception:
-            hour = 8
-            departure_time = "08:00"
-
         if congestion_label == "HIGH":
             departure_advice = (
                 f"High congestion expected near {junction_label or 'your route'}. "
                 "We recommend departing 45–60 minutes earlier than planned."
             )
-            optimal_hour = max(0, hour - 1)
-            optimal_departure = f"{optimal_hour:02d}:{minute_str}"
+            total_mins = hour * 60 + int(minute_str) - 60
+            if total_mins < 0: total_mins += 24 * 60
+            optimal_departure = f"{total_mins // 60:02d}:{total_mins % 60:02d}"
         elif congestion_label == "MODERATE":
             departure_advice = (
                 f"Moderate congestion predicted. Consider leaving 20–30 minutes earlier "
                 "to stay within your buffer."
             )
-            optimal_hour = max(0, hour - 0)
-            optimal_departure = f"{optimal_hour:02d}:{minute_str}"
+            total_mins = hour * 60 + int(minute_str) - 30
+            if total_mins < 0: total_mins += 24 * 60
+            optimal_departure = f"{total_mins // 60:02d}:{total_mins % 60:02d}"
         else:
             departure_advice = "Traffic conditions look favorable. You can proceed as planned."
             optimal_departure = departure_time
 
-        # Rough parking estimate in minutes to find a spot
-        if congestion_label == "HIGH":
-            parking_estimate = 35
-        elif congestion_label == "MODERATE":
-            parking_estimate = 20
-        else:
-            parking_estimate = 10
+        # Parking estimate in minutes to find a spot
+        parking_estimate = _predict_parking_minutes(traffic_level)
+        if parking_estimate is None:
+            # Fallback heuristic if parking model unavailable or fails
+            if congestion_label == "HIGH":
+                parking_estimate = 35
+            elif congestion_label == "MODERATE":
+                parking_estimate = 20
+            else:
+                parking_estimate = 10
 
         best_route = f"{req.origin} → {req.destination}"
         if junction_label:

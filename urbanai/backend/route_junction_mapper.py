@@ -165,19 +165,46 @@ def get_junctions_google_maps(
 # Public demo server: http://router.project-osrm.org
 # For production: self-host → https://github.com/Project-OSRM/osrm-backend
 # ──────────────────────────────────────────────────────────────────
+
+import time
+
+# Pre-calculated coordinates for frontend dropdown locations to avoid Nominatim rate limits mapping failures
+COMMON_LOCATIONS = {
+    'Andheri (W)': (19.1172, 72.8340), 'Bandra (W)': (19.0544, 72.8402), 'Borivali': (19.2295, 72.8575), 
+    'Churchgate': (18.9322, 72.8264), 'Dadar': (19.0178, 72.8478), 'Goregaon': (19.1646, 72.8493), 
+    'Kurla': (19.0726, 72.8795), 'Lower Parel': (18.9950, 72.8300), 'Marine Drive': (18.9431, 72.8227), 
+    'Mulund': (19.1726, 72.9567), 'Powai': (19.1187, 72.9073), 'Thane': (19.2183, 72.9781), 
+    'Vikhroli': (19.1100, 72.9268), 'Worli': (19.0117, 72.8179),
+    'BKC (Bandra Kurla Complex)': (19.0677, 72.8648), 'Nariman Point': (18.9256, 72.8242), 
+    'Andheri (E)': (19.1159, 72.8542), 'Navi Mumbai': (19.0330, 73.0297), 
+    'CST / Fort Area': (18.9398, 72.8354), 'Airport': (19.0887, 72.8679),
+}
+
 def geocode_place_osm(place_name: str) -> Optional[tuple]:
     """
     Convert a place name to (lat, lng) using Nominatim (OpenStreetMap geocoder).
     Free, no API key needed.
     """
+    if place_name in COMMON_LOCATIONS:
+        print(f"  [Cache Geocode] '{place_name}' → {COMMON_LOCATIONS[place_name]}")
+        return COMMON_LOCATIONS[place_name]
+
+    # Clean up name format to improve Nominatim lookups
+    search_query = place_name
+    if ", Mumbai" not in search_query and "Mumbai" not in search_query:
+        search_query += ", Mumbai"
+
     url = "https://nominatim.openstreetmap.org/search"
     params = {
-        "q"      : place_name,
+        "q"      : search_query,
         "format" : "json",
         "limit"  : 1,
         "countrycodes": "IN",  # restrict to India
     }
     headers = {"User-Agent": "MumbaiTrafficPredictor/1.0"}
+    
+    # Nominatim has a strict 1 request per second policy. Delay to guarantee we don't hit 429
+    time.sleep(1.2)
     response = requests.get(url, params=params, headers=headers, timeout=10)
     response.raise_for_status()
     results = response.json()
@@ -223,7 +250,7 @@ def get_junctions_osrm(
         f"?overview=full&geometries=geojson"
     )
 
-    response = requests.get(url, timeout=10)
+    response = requests.get(url, timeout=30)
     response.raise_for_status()
     data = response.json()
 
