@@ -46,6 +46,52 @@ function RouteCard({ route, delay }) {
   )
 }
 
+const WHY_CARDS = [
+  {
+    icon: '🧠',
+    title: 'Predictive, Not Reactive',
+    desc: 'While Google Maps shows current traffic, UrbanAI forecasts congestion up to 2 hours ahead using LSTM neural networks trained on 5+ years of data.',
+    color: 'var(--accent-cyan)',
+  },
+  {
+    icon: '⚡',
+    title: 'Departure Intelligence',
+    desc: 'Our optimization engine computes the perfect departure window by balancing predicted traffic, parking demand, and your personal schedule constraints.',
+    color: 'var(--accent-orange)',
+  },
+  {
+    icon: '🅿️',
+    title: 'Parking Foresight',
+    desc: 'Know parking availability before you arrive. ML-driven demand curves predict how fast spots fill so you can plan your approach with confidence.',
+    color: 'var(--accent-violet)',
+  },
+]
+
+function WhyCards() {
+  const [ref, inView] = useInView()
+
+  return (
+    <div className="why-grid" ref={ref}>
+      {WHY_CARDS.map((card, i) => (
+        <div
+          key={card.title}
+          className="why-card"
+          style={{
+            '--why-color': card.color,
+            opacity: inView ? 1 : 0,
+            transform: inView ? 'translateY(0)' : 'translateY(30px)',
+            transition: `all 0.7s cubic-bezier(0.34,1.2,0.64,1) ${i * 140}ms`,
+          }}
+        >
+          <div className="why-card__icon">{card.icon}</div>
+          <h3 className="why-card__title">{card.title}</h3>
+          <p className="why-card__desc">{card.desc}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function Home() {
   const navigate = useNavigate()
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 })
@@ -124,6 +170,21 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* ── Why UrbanAI ───────────────────────────────────── */}
+      <section className="why-section">
+        <div className="why-section__header">
+          <div className="label-tag" style={{ color: 'var(--accent-cyan)' }}>Why UrbanAI</div>
+          <h2 className="section-title" style={{ marginTop: 20, marginBottom: 16, fontSize: 'clamp(32px, 4vw, 52px)' }}>
+            WHAT MAKES US<br /><span className="gradient-text">DIFFERENT</span>
+          </h2>
+          <p className="section-subtitle" style={{ margin: '0 auto' }}>
+            Three pillars that set UrbanAI apart from conventional navigation tools.
+          </p>
+        </div>
+
+        <WhyCards />
       </section>
 
       {/* ── Live Routes Preview ───────────────────────────── */}

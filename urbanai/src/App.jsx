@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar/Navbar.jsx'
+import Footer from './components/Footer/Footer.jsx'
+import BackToTop from './components/BackToTop/BackToTop.jsx'
 import Home from './pages/Home/Home.jsx'
 import Features from './pages/Features/Features.jsx'
 import HowItWorks from './pages/HowItWorks/HowItWorks.jsx'
@@ -59,14 +61,20 @@ function CustomCursor() {
   )
 }
 
-export default function App() {
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
+
+function AnimatedRoutes() {
+  const location = useLocation()
+
   return (
-    <Router>
-      <div className="noise-overlay" />
-      <CustomCursor />
-      <ScrollProgress />
-      <Navbar />
-      <Routes>
+    <div className="page-transition" key={location.pathname}>
+      <Routes location={location}>
         <Route path="/" element={<Home />} />
         <Route path="/features" element={<Features />} />
         <Route path="/how-it-works" element={<HowItWorks />} />
@@ -74,6 +82,21 @@ export default function App() {
         <Route path="/model" element={<ModelService />} />
         <Route path="/about" element={<About />} />
       </Routes>
+      <Footer />
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <Router>
+      <div className="noise-overlay" />
+      <CustomCursor />
+      <ScrollProgress />
+      <Navbar />
+      <ScrollToTop />
+      <AnimatedRoutes />
+      <BackToTop />
     </Router>
   )
 }

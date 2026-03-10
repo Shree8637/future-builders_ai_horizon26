@@ -33,41 +33,21 @@ const MODEL_INFO_CARDS = [
   },
 ]
 
-// ── Mock prediction engine — replace with real API call ──────────────
-// To connect your trained model, replace the mock below with:
-//
-//   const res = await fetch('https://your-api.com/predict', {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify(formData),
-//   })
-//   const result = await res.json()
-//
-function mockPredict(formData) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const hour = parseInt(formData.departureTime?.split(':')[0] || 8)
-      const isPeak = (hour >= 7 && hour <= 10) || (hour >= 17 && hour <= 20)
-      const trafficLevel = isPeak ? 75 + Math.floor(Math.random() * 22) : 25 + Math.floor(Math.random() * 35)
-      const confidence = 85 + Math.floor(Math.random() * 10)
-      const baseEta = 20 + Math.floor(Math.random() * 30)
-      const eta = isPeak ? baseEta + 15 + Math.floor(Math.random() * 20) : baseEta
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
-      resolve({
-        confidence,
-        trafficLevel,
-        eta,
-        departureAdvice: isPeak
-          ? `High congestion expected. We recommend departing 45 min earlier or waiting until ${hour + 2}:30.`
-          : 'Traffic conditions look favorable for your journey. Proceed as planned.',
-        optimalDeparture: isPeak ? `${hour - 1}:00` : formData.departureTime,
-        parkingEstimate: Math.floor(Math.random() * 60) + 10,
-        bestRoute: `${formData.origin} → ${formData.destination} via ${isPeak ? 'Western Express Hwy (avoid Eastern)' : 'Optimal Highway Route'}`,
-        congestionLabel: trafficLevel > 80 ? 'HIGH' : trafficLevel > 55 ? 'MODERATE' : 'LOW',
-        congestionColor: trafficLevel > 80 ? '#ff5c2b' : trafficLevel > 55 ? '#f5c842' : '#00ffe7',
-      })
-    }, 2200)
+async function callModelApi(formData) {
+  const res = await fetch(`${API_BASE_URL}/api/predict`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData),
   })
+
+  if (!res.ok) {
+    const msg = await res.text()
+    throw new Error(msg || 'Prediction request failed')
+  }
+
+  return res.json()
 }
 
 export default function ModelService() {
@@ -107,8 +87,7 @@ export default function ModelService() {
     setError(null)
 
     try {
-      // ── Replace mockPredict with your real model API call here ──
-      const data = await mockPredict(formData)
+      const data = await callModelApi(formData)
       setResult(data)
       setTimeout(() => setConfidenceAnim(data.confidence), 300)
     } catch (err) {
