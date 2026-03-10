@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { AuthProvider, useAuth } from './context/AuthContext.jsx'
 import Navbar from './components/Navbar/Navbar.jsx'
 import Home from './pages/Home/Home.jsx'
 import Features from './pages/Features/Features.jsx'
@@ -7,73 +8,115 @@ import HowItWorks from './pages/HowItWorks/HowItWorks.jsx'
 import Dashboard from './pages/Dashboard/Dashboard.jsx'
 import ModelService from './pages/ModelService/ModelService.jsx'
 import About from './pages/About/About.jsx'
+import Auth from './pages/Auth/Auth.jsx'
 import ScrollProgress from './components/ScrollProgress/ScrollProgress.jsx'
 
-function CustomCursor() {
-  const dotRef = useRef(null)
-  const ringRef = useRef(null)
+/* ── Loading splash ──────────────────────────────────────── */
+function Splash() {
+  return (
+    <div style={{
+      minHeight:'100vh', display:'flex', flexDirection:'column',
+      alignItems:'center', justifyContent:'center',
+      background:'var(--bg-base)', gap:20,
+    }}>
+      <style>{`
+        @keyframes _spin { to { transform: rotate(360deg); } }
+      `}</style>
+      <div style={{
+        width:48, height:48, borderRadius:'50%',
+        border:'2px solid rgba(0,212,184,0.12)',
+        borderTopColor:'var(--accent-cyan)',
+        animation:'_spin 1s linear infinite',
+      }}/>
+      <p style={{
+        fontFamily:'var(--font-mono)', fontSize:11,
+        color:'var(--text-muted)', letterSpacing:'0.2em',
+      }}>LOADING…</p>
+    </div>
+  )
+}
+
+/* ── Protected route: redirect to /auth when not signed in ── */
+function Guard({ children }) {
+  const { user, loading } = useAuth()
+  const loc = useLocation()
+  if (loading) return <Splash />
+  if (!user)              return <Navigate to="/auth" state={{ from: loc }} replace />
+  if (!user.displayName)  return <Navigate to="/auth" replace />
+  return children
+}
+
+/* ── Custom cursor ───────────────────────────────────────── */
+function Cursor() {
+  const dot  = useRef(null)
+  const ring = useRef(null)
 
   useEffect(() => {
-    let mouseX = 0, mouseY = 0
-    let ringX = 0, ringY = 0
-    let rafId
-
-    const onMove = (e) => {
-      mouseX = e.clientX
-      mouseY = e.clientY
-      if (dotRef.current) {
-        dotRef.current.style.left = mouseX + 'px'
-        dotRef.current.style.top = mouseY + 'px'
-      }
+    let mx=0, my=0, rx=0, ry=0, raf
+    const move = e => {
+      mx=e.clientX; my=e.clientY
+      if (dot.current) { dot.current.style.left=mx+'px'; dot.current.style.top=my+'px' }
     }
-
-    const animate = () => {
-      ringX += (mouseX - ringX) * 0.12
-      ringY += (mouseY - ringY) * 0.12
-      if (ringRef.current) {
-        ringRef.current.style.left = ringX + 'px'
-        ringRef.current.style.top = ringY + 'px'
-      }
-      rafId = requestAnimationFrame(animate)
+    const tick = () => {
+      rx += (mx-rx)*0.12; ry += (my-ry)*0.12
+      if (ring.current) { ring.current.style.left=rx+'px'; ring.current.style.top=ry+'px' }
+      raf = requestAnimationFrame(tick)
     }
-
-    const onEnter = () => ringRef.current?.classList.add('hovering')
-    const onLeave = () => ringRef.current?.classList.remove('hovering')
-
-    window.addEventListener('mousemove', onMove)
-    document.querySelectorAll('a, button, [data-hover]')
-      .forEach(el => { el.addEventListener('mouseenter', onEnter); el.addEventListener('mouseleave', onLeave) })
-
-    rafId = requestAnimationFrame(animate)
-    return () => {
-      window.removeEventListener('mousemove', onMove)
-      cancelAnimationFrame(rafId)
-    }
+    const on  = () => ring.current?.classList.add('hovering')
+    const off = () => ring.current?.classList.remove('hovering')
+    window.addEventListener('mousemove', move)
+    document.querySelectorAll('a,button,[data-hover]').forEach(el => {
+      el.addEventListener('mouseenter', on); el.addEventListener('mouseleave', off)
+    })
+    raf = requestAnimationFrame(tick)
+    return () => { window.removeEventListener('mousemove', move); cancelAnimationFrame(raf) }
   }, [])
 
   return (
     <>
-      <div className="cursor-dot" ref={dotRef} />
-      <div className="cursor-ring" ref={ringRef} />
+      <div className="cursor-dot"  ref={dot}  />
+      <div className="cursor-ring" ref={ring} />
+    </>
+  )
+}
+
+/* ── Shell (router-aware) ────────────────────────────────── */
+function Shell() {
+  const loc       = useLocation()
+  const isAuth    = loc.pathname === '/auth'
+
+  return (
+    <>
+      <div className="noise-overlay" />
+      <Cursor />
+      <ScrollProgress />
+      {!isAuth && <Navbar />}
+
+      <Routes>
+        {/* Public */}
+        <Route path="/auth" element={<Auth />} />
+
+        {/* Protected – redirect to /auth if not logged in */}
+        <Route path="/"             element={<Guard><Home /></Guard>} />
+        <Route path="/features"     element={<Guard><Features /></Guard>} />
+        <Route path="/how-it-works" element={<Guard><HowItWorks /></Guard>} />
+        <Route path="/dashboard"    element={<Guard><Dashboard /></Guard>} />
+        <Route path="/model"        element={<Guard><ModelService /></Guard>} />
+        <Route path="/about"        element={<Guard><About /></Guard>} />
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </>
   )
 }
 
 export default function App() {
   return (
-    <Router>
-      <div className="noise-overlay" />
-      <CustomCursor />
-      <ScrollProgress />
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/features" element={<Features />} />
-        <Route path="/how-it-works" element={<HowItWorks />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/model" element={<ModelService />} />
-        <Route path="/about" element={<About />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Shell />
+      </Router>
+    </AuthProvider>
   )
 }

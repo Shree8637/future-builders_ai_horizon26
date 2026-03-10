@@ -1,18 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useInView } from '../../hooks/useInView.js'
+import { useAuth } from '../../context/AuthContext.jsx'
 import { ROUTES } from '../../data/constants.js'
 import './Home.css'
 
 const NODES = [
-  { size: 8, x: 12, y: 18, color: '#00ffe7', dur: 4.2 },
-  { size: 5, x: 82, y: 25, color: '#ff5c2b', dur: 5.8 },
-  { size: 10, x: 65, y: 72, color: '#00ffe7', dur: 3.5 },
-  { size: 6, x: 25, y: 68, color: '#b57bff', dur: 6.1 },
-  { size: 4, x: 90, y: 55, color: '#f5c842', dur: 4.8 },
-  { size: 7, x: 45, y: 85, color: '#00ffe7', dur: 5.2 },
-  { size: 5, x: 8, y: 50, color: '#ff5c2b', dur: 3.9 },
-  { size: 9, x: 76, y: 15, color: '#b57bff', dur: 7.0 },
+  { size: 8,  x: 12, y: 18, color: '#00d4b8', dur: 4.2 },
+  { size: 5,  x: 82, y: 25, color: '#ff6b35', dur: 5.8 },
+  { size: 10, x: 65, y: 72, color: '#00d4b8', dur: 3.5 },
+  { size: 6,  x: 25, y: 68, color: '#9d6fff', dur: 6.1 },
+  { size: 4,  x: 90, y: 55, color: '#f0b429', dur: 4.8 },
+  { size: 7,  x: 45, y: 85, color: '#00d4b8', dur: 5.2 },
+  { size: 5,  x: 8,  y: 50, color: '#ff6b35', dur: 3.9 },
+  { size: 9,  x: 76, y: 15, color: '#9d6fff', dur: 7.0 },
 ]
 
 function RouteCard({ route, delay }) {
@@ -26,7 +27,7 @@ function RouteCard({ route, delay }) {
   return (
     <div
       ref={ref}
-      className="route-card reveal"
+      className="route-card"
       style={{
         '--accent-color': route.color,
         opacity: inView ? 1 : 0,
@@ -47,7 +48,8 @@ function RouteCard({ route, delay }) {
 }
 
 export default function Home() {
-  const navigate = useNavigate()
+  const navigate  = useNavigate()
+  const { user }  = useAuth()
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 })
   const heroRef = useRef(null)
   const [cityRef, cityInView] = useInView()
@@ -55,18 +57,30 @@ export default function Home() {
   const handleMouseMove = (e) => {
     const rect = heroRef.current?.getBoundingClientRect()
     if (!rect) return
-    setMousePos({ x: (e.clientX - rect.left) / rect.width, y: (e.clientY - rect.top) / rect.height })
+    setMousePos({
+      x: (e.clientX - rect.left) / rect.width,
+      y: (e.clientY - rect.top) / rect.height,
+    })
   }
+
+  const getGreeting = () => {
+    const h = new Date().getHours()
+    if (h < 12) return 'Good Morning'
+    if (h < 17) return 'Good Afternoon'
+    return 'Good Evening'
+  }
+
+  const firstName = user?.displayName?.trim().split(' ')[0] || null
 
   return (
     <main className="home">
-      {/* ── Hero ─────────────────────────────────────────── */}
+
+      {/* ── Hero ──────────────────────────────────────────── */}
       <section className="hero" ref={heroRef} onMouseMove={handleMouseMove}>
-        <div
-          className="hero__grid"
+
+        <div className="hero__grid"
           style={{ transform: `translate(${(mousePos.x - 0.5) * -18}px, ${(mousePos.y - 0.5) * -18}px)` }}
         />
-
         <div className="hero__orb hero__orb--cyan"
           style={{ transform: `translate(calc(-50% + ${(mousePos.x - 0.5) * 40}px), calc(-50% + ${(mousePos.y - 0.5) * 30}px))` }}
         />
@@ -87,6 +101,14 @@ export default function Home() {
         </div>
 
         <div className="hero__content">
+
+          {/* Greeting with first name */}
+          {firstName && (
+            <div className="hero__greeting">
+              {getGreeting()}, <span>{firstName}</span> 👋
+            </div>
+          )}
+
           <div className="hero__eyebrow">
             <span className="hero__eyebrow-dot" />
             AI-Powered Urban Mobility · Mumbai
@@ -100,7 +122,8 @@ export default function Home() {
 
           <p className="hero__sub">
             An AI-driven predictive navigation system using LSTM neural networks to forecast
-            traffic, optimize your departure time, and locate parking — built for Mumbai's 20M+ daily commuters.
+            traffic, optimize your departure time, and locate parking — built for Mumbai's
+            20M+ daily commuters.
           </p>
 
           <div className="hero__actions">
@@ -114,33 +137,36 @@ export default function Home() {
               How It Works
             </button>
           </div>
-        </div>
 
-        <div className="hero__stats">
-          {[['20M+', 'Daily Commuters'], ['92%', 'Accuracy'], ['38%', 'Time Saved'], ['2 hrs', 'Forecast Window']].map(([val, label]) => (
-            <div className="hero__stat" key={label}>
-              <span className="hero__stat-value">{val}</span>
-              <span className="hero__stat-label">{label}</span>
-            </div>
-          ))}
+          <div className="hero__stats">
+            {[
+              ['20M+', 'Daily Commuters'],
+              ['92%',  'Accuracy'],
+              ['38%',  'Time Saved'],
+              ['2 hrs','Forecast Window'],
+            ].map(([val, label]) => (
+              <div className="hero__stat" key={label}>
+                <span className="hero__stat-value">{val}</span>
+                <span className="hero__stat-label">{label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── Live Routes Preview ───────────────────────────── */}
+      {/* ── Live Routes ────────────────────────────────────── */}
       <section className="hero__city">
         <div
           ref={cityRef}
-          className="hero__city-title reveal"
+          className="hero__city-title"
           style={{
             opacity: cityInView ? 1 : 0,
             transform: cityInView ? 'translateY(0)' : 'translateY(30px)',
             transition: 'all 0.7s ease',
           }}
         >
-          <h2>LIVE ROUTE INTELLIGENCE</h2>
-          <p className="hero__city-title p" style={{ color: 'var(--text-secondary)', fontSize: 14, fontFamily: 'var(--font-mono)' }}>
-            Real-time predictions for Mumbai's busiest corridors
-          </p>
+          <h2>LIVE ROUTE <span style={{ color: 'var(--accent-cyan)' }}>INTELLIGENCE</span></h2>
+          <p>Real-time predictions for Mumbai's busiest corridors</p>
         </div>
 
         <div className="hero__routes">
@@ -149,6 +175,7 @@ export default function Home() {
           ))}
         </div>
       </section>
+
     </main>
   )
 }

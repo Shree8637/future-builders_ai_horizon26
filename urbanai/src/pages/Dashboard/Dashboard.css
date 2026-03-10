@@ -5,7 +5,7 @@
 }
 
 .dashboard-page__header {
-  padding: 60px 32px 28px;
+  padding: 60px 32px 40px;
   max-width: 1240px;
   margin: 0 auto;
   display: flex;
@@ -15,20 +15,22 @@
   flex-wrap: wrap;
 }
 
-.live-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--accent-cyan);
-  animation: blink 1.5s ease-in-out infinite;
-  box-shadow: 0 0 8px var(--accent-cyan);
-  display: inline-block;
-}
+.dashboard-page__title-block {}
 
 .dashboard-page__status {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  animation: blink 1.5s ease-in-out infinite;
+  box-shadow: 0 0 8px var(--accent-cyan);
 }
 
 .dashboard-page__status span {
@@ -62,66 +64,24 @@
   text-align: right;
 }
 
-.kpi-strip {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 0 32px 20px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-.kpi-card {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: var(--radius-md);
-  padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  transition: all var(--transition-smooth);
-}
-
-.kpi-card:hover {
-  border-color: rgba(0,212,184,0.22);
-  transform: translateY(-2px);
-}
-
-.kpi-card__label {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
-.kpi-card__value {
-  font-family: var(--font-display);
-  font-size: 32px;
-  letter-spacing: 0.04em;
-  line-height: 1;
-}
-
-.kpi-card__delta {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-muted);
-}
-
+/* Grid Layout */
 .dashboard-grid {
   max-width: 1240px;
   margin: 0 auto;
   padding: 0 32px 80px;
   display: grid;
   grid-template-columns: 3fr 2fr;
+  grid-template-rows: auto;
   gap: 20px;
 }
 
 .dash-card {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 28px;
+  position: relative;
+  overflow: hidden;
 }
 
 .dash-card__label {
@@ -141,7 +101,10 @@
   margin-bottom: 24px;
 }
 
-.traffic-chart { grid-column: 1 / -1; }
+/* Traffic Chart */
+.traffic-chart {
+  grid-column: 1 / -1;
+}
 
 .traffic-chart__bars {
   display: flex;
@@ -194,7 +157,9 @@
   white-space: nowrap;
 }
 
-.traffic-bar.current .traffic-bar__fill { box-shadow: 0 0 12px currentColor; }
+.traffic-bar.current .traffic-bar__fill {
+  box-shadow: 0 0 12px currentColor;
+}
 
 .chart-legend {
   display: flex;
@@ -213,7 +178,16 @@
   color: var(--text-muted);
 }
 
-.chart-legend__dot { width: 8px; height: 8px; border-radius: 2px; }
+.chart-legend__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+/* Routes */
+.routes-card {
+  grid-row: span 1;
+}
 
 .route-item {
   padding: 14px 16px;
@@ -227,8 +201,8 @@
 .route-item:last-child { margin-bottom: 0; }
 
 .route-item:hover, .route-item.active {
-  background: rgba(255,255,255,0.04);
-  border-color: rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.03);
+  border-color: var(--border-subtle);
 }
 
 .route-item__top {
@@ -256,7 +230,7 @@
 
 .route-item__bar-bg {
   height: 3px;
-  background: rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.05);
   border-radius: 2px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -274,7 +248,11 @@
   color: var(--text-muted);
 }
 
-.parking-item { margin-bottom: 16px; }
+/* Parking */
+.parking-item {
+  margin-bottom: 16px;
+}
+
 .parking-item:last-child { margin-bottom: 0; }
 
 .parking-item__header {
@@ -298,7 +276,7 @@
 
 .parking-item__bar-bg {
   height: 5px;
-  background: rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.05);
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 4px;
@@ -316,10 +294,11 @@
   color: var(--text-muted);
 }
 
+/* Departure Planner */
 .departure-card {
   grid-column: 1 / -1;
-  background: linear-gradient(135deg, rgba(0,212,184,0.06), rgba(157,111,255,0.06)) !important;
-  border-color: rgba(0,212,184,0.18) !important;
+  background: linear-gradient(135deg, rgba(0,255,231,0.04) 0%, rgba(181,123,255,0.04) 100%);
+  border-color: rgba(0,255,231,0.15);
 }
 
 .departure-card__inner {
@@ -330,7 +309,11 @@
   flex-wrap: wrap;
 }
 
-.departure-card__windows { display: flex; gap: 16px; flex-wrap: wrap; }
+.departure-card__windows {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
 
 .departure-window {
   text-align: center;
@@ -343,11 +326,25 @@
   overflow: hidden;
 }
 
-.departure-window.selected { box-shadow: 0 0 24px var(--window-color); }
+.departure-window::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--window-color);
+  opacity: 0;
+  transition: opacity var(--transition-smooth);
+}
+
+.departure-window:hover::before,
+.departure-window.selected::before { opacity: 0.06; }
+
+.departure-window.selected {
+  box-shadow: 0 0 24px var(--window-color);
+}
 
 .departure-window__time {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 24px;
   color: var(--window-color);
   letter-spacing: 0.06em;
   display: block;
@@ -366,11 +363,60 @@
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--window-color);
-  opacity: 0.85;
+  opacity: 0.8;
+}
+
+/* KPI strip */
+.kpi-strip {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 32px 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all var(--transition-smooth);
+}
+
+.kpi-card:hover {
+  border-color: rgba(0,255,231,0.15);
+  transform: translateY(-2px);
+}
+
+.kpi-card__label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.kpi-card__value {
+  font-family: var(--font-display);
+  font-size: 32px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.kpi-card__delta {
+  font-family: var(--font-mono);
+  font-size: 10px;
 }
 
 @media (max-width: 900px) {
-  .dashboard-grid { grid-template-columns: 1fr; }
-  .traffic-chart, .departure-card { grid-column: 1; }
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .traffic-chart { grid-column: 1; }
+  .departure-card { grid-column: 1; }
   .kpi-strip { grid-template-columns: repeat(2, 1fr); }
 }
