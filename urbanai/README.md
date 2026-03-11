@@ -39,10 +39,11 @@ The system follows a decoupled client-server architecture:
 
 ## 📸 Screenshots
 
-*(Add UI screenshots of your project here)*
+![Landing Page](urbanai\backend\landing_page.png)
 
-- **Dashboard**: https://vscode.dev/github/Shree8637/future-builders_ai_horizon26/blob/main/urbanai/backend/dashboard.png
-- **Model Service page**: [urbanai\backend\model_service.png](https://vscode.dev/github/Shree8637/future-builders_ai_horizon26/blob/main/urbanai/backend/lstm_results.png)
+
+- **Dashboard**: ![App Screenshot](urbanai/backend/dashboard.png)
+- **Model Service page**: ![App Screenshot](urbanai/backend/model_service.png)
 
 ### Model Results Visualization
 
