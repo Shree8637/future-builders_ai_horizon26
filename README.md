@@ -39,7 +39,7 @@ The system follows a decoupled client-server architecture:
 
 ## 📸 Screenshots
 
-![Landing Page](urbanai\backend\images\landing_page.png)
+![Landing Page](urbanai/backend/images/landing_page.png)
 
 - **Dashboard**: ![App Screenshot](urbanai/backend/images/dashboard.png)
 - **Model Service page**: ![App Screenshot](urbanai/backend/images/model_service.png)
