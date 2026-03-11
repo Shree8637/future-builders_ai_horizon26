@@ -39,16 +39,16 @@ The system follows a decoupled client-server architecture:
 
 ## 📸 Screenshots
 
-![Landing Page](urbanai\backend\landing_page.png)
+![Landing Page](urbanai\backend\images\landing_page.png)
 
-- **Dashboard**: ![App Screenshot](urbanai/backend/dashboard.png)
-- **Model Service page**: ![App Screenshot](urbanai/backend/model_service.png)
+- **Dashboard**: ![App Screenshot](urbanai/backend/images/dashboard.png)
+- **Model Service page**: ![App Screenshot](urbanai/backend/images/model_service.png)
 
 ### Model Results Visualization
 
 The following plot illustrates the performance of the LSTM Traffic model, comparing predicted vs. actual congestion indices alongside training/validation loss curves.
 
-![LSTM Results Context](backend/lstm_results.png)
+![LSTM Results Context](backend/images/lstm_results.png)
 
 ---
 
