@@ -1,0 +1,389 @@
+/* ═══════════════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════════════ */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 68px;
+  background: transparent;
+  transition: background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease;
+}
+
+.navbar.scrolled {
+  background: rgba(13, 31, 45, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06), 0 8px 32px rgba(0, 0, 0, 0.28);
+}
+
+/* ── Logo ─────────────────────────────────────────── */
+.navbar__logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.navbar__logo-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent-cyan), #007a96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 18px rgba(0, 212, 184, 0.35);
+  flex-shrink: 0;
+  transition: box-shadow 0.25s ease;
+}
+
+.navbar__logo:hover .navbar__logo-icon {
+  box-shadow: 0 0 28px rgba(0, 212, 184, 0.55);
+}
+
+.navbar__logo-text {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0.18em;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.navbar__logo-text span {
+  color: var(--accent-cyan);
+}
+
+/* ── Desktop Links ────────────────────────────────── */
+.navbar__links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar__link {
+  display: flex;
+  align-items: center;
+  padding: 7px 13px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-label);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.navbar__link:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.navbar__link.active {
+  color: var(--accent-cyan);
+  background: rgba(0, 212, 184, 0.08);
+}
+
+.navbar__link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px var(--accent-cyan);
+}
+
+/* ── CTA Area ─────────────────────────────────────── */
+.navbar__cta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.navbar__model-badge {
+  font-family: var(--font-label);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--accent-cyan);
+  border: 1px solid rgba(0, 212, 184, 0.30);
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  background: rgba(0, 212, 184, 0.07);
+  position: relative;
+  white-space: nowrap;
+}
+
+.navbar__model-badge::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 6px var(--accent-cyan);
+  margin-right: 6px;
+  vertical-align: middle;
+  animation: blink 2s ease-in-out infinite;
+}
+
+/* ── Hamburger Toggle ─────────────────────────────── */
+.navbar__toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.navbar__toggle:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.navbar__toggle span {
+  display: block;
+  height: 2px;
+  background: var(--text-secondary);
+  border-radius: 1px;
+  transition: all 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+  transform-origin: center;
+}
+
+.navbar__toggle.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+  background: var(--accent-cyan);
+}
+.navbar__toggle.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.navbar__toggle.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+  background: var(--accent-cyan);
+}
+
+/* ── Mobile Menu ──────────────────────────────────── */
+.navbar__mobile-menu {
+  display: none;
+  position: fixed;
+  top: 68px;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px 24px;
+  background: rgba(11, 26, 38, 0.97);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+  transform: translateY(-10px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+  pointer-events: none;
+}
+
+.navbar__mobile-menu.open {
+  display: flex;
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+
+.navbar__mobile-link {
+  display: block;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-label);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  opacity: 0;
+  animation: fade-in-up 0.35s ease forwards;
+}
+
+.navbar__mobile-link:hover,
+.navbar__mobile-link.active {
+  color: var(--accent-cyan);
+  background: rgba(0, 212, 184, 0.07);
+}
+
+.navbar__mobile-menu .btn-primary,
+.navbar__mobile-menu .btn-ghost {
+  margin-top: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 900px) {
+  .navbar__links { display: none; }
+  .navbar__model-badge { display: none; }
+  .navbar__cta .btn-primary,
+  .navbar__cta .user-menu { display: none; }
+  .navbar__toggle { display: flex; }
+}
+
+@media (max-width: 480px) {
+  .navbar { padding: 0 18px; height: 62px; }
+  .navbar__logo-text { font-size: 19px; }
+  .navbar__mobile-menu { top: 62px; }
+}
+
+/* ═══════════════════════════════════════════════════
+   USER MENU (Sign In / Sign Out dropdown)
+═══════════════════════════════════════════════════ */
+
+.user-menu {
+  position: relative;
+}
+
+.user-menu__trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.user-menu__trigger:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(0, 212, 184, 0.35);
+}
+
+.user-menu__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00d4b8, #9d6fff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0a1a28;
+  flex-shrink: 0;
+}
+
+.user-menu__avatar-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.user-menu__name {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #ddeeff;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-menu__chevron {
+  font-size: 10px;
+  color: #4a6680;
+  transition: transform 0.25s ease;
+  display: inline-block;
+}
+
+.user-menu__chevron.open {
+  transform: rotate(180deg);
+}
+
+.user-menu__dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 220px;
+  background: rgba(13, 31, 45, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  animation: fade-in-up 0.2s ease;
+  z-index: 1100;
+}
+
+.user-menu__dropdown-header {
+  padding: 16px 18px;
+  background: rgba(0, 212, 184, 0.05);
+}
+
+.user-menu__dropdown-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ddeeff;
+  margin-bottom: 3px;
+}
+
+.user-menu__dropdown-email {
+  font-size: 11px;
+  color: #4a6680;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-menu__dropdown-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.user-menu__dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 18px;
+  background: none;
+  border: none;
+  color: #7a99b8;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.user-menu__dropdown-item:hover {
+  background: rgba(255, 107, 53, 0.08);
+  color: #ff6b35;
+}
