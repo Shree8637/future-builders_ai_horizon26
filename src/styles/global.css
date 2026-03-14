@@ -1,0 +1,263 @@
+/* ── Design Tokens — Dark Mode (default) ─────────────────── */
+:root,
+[data-theme="dark"] {
+  /* Backgrounds */
+  --bg-base:      #020609;
+  --bg-surface:   #060e14;
+  --bg-card:      #0a1824;
+  --bg-card-hover:#0d2033;
+
+  /* Text */
+  --text-primary:   #f0f6ff;
+  --text-secondary: #8a9bb0;
+  --text-muted:     #4a5a6a;
+
+  /* Borders */
+  --border-subtle:  rgba(255, 255, 255, 0.07);
+  --border-medium:  rgba(255, 255, 255, 0.12);
+
+  /* Accents */
+  --accent-cyan:    #00ffe7;
+  --accent-orange:  #ff6b35;
+  --accent-violet:  #b57bff;
+  --accent-gold:    #f5c842;
+
+  /* Scrollbar */
+  --scrollbar-track: #060e14;
+  --scrollbar-thumb: #1a3045;
+
+  /* Navbar */
+  --navbar-scrolled-bg: rgba(2, 6, 9, 0.88);
+
+  /* Shadow */
+  --shadow-card: 0 20px 60px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 40px rgba(0, 255, 231, 0.12);
+
+  /* Theme toggle icon */
+  --toggle-icon: '☀️';
+}
+
+/* ── Design Tokens — Light Mode ───────────────────────────── */
+[data-theme="light"] {
+  /* Backgrounds */
+  --bg-base:      #f0f4f8;
+  --bg-surface:   #e4ecf4;
+  --bg-card:      #ffffff;
+  --bg-card-hover:#f5f9ff;
+
+  /* Text */
+  --text-primary:   #0a1628;
+  --text-secondary: #3a5068;
+  --text-muted:     #7a92a8;
+
+  /* Borders */
+  --border-subtle:  rgba(0, 0, 0, 0.08);
+  --border-medium:  rgba(0, 0, 0, 0.15);
+
+  /* Accents — slightly deeper so they pop on white */
+  --accent-cyan:    #00b8a4;
+  --accent-orange:  #e85d24;
+  --accent-violet:  #8a4fdd;
+  --accent-gold:    #c9a000;
+
+  /* Scrollbar */
+  --scrollbar-track: #e4ecf4;
+  --scrollbar-thumb: #b0c4d8;
+
+  /* Navbar */
+  --navbar-scrolled-bg: rgba(240, 244, 248, 0.92);
+
+  /* Shadow */
+  --shadow-card: 0 8px 32px rgba(0,0,0,0.12);
+  --shadow-glow: 0 0 40px rgba(0, 184, 164, 0.10);
+
+  /* Theme toggle icon */
+  --toggle-icon: '🌙';
+}
+
+/* ── Shared tokens (same in both modes) ─────────────────── */
+:root {
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+  --font-label:   'Space Mono', monospace;
+  --font-ui:      'Syne', sans-serif;
+
+  --radius-sm:   6px;
+  --radius-md:   12px;
+  --radius-lg:   18px;
+  --radius-xl:   24px;
+  --radius-full: 9999px;
+
+  --transition-fast:   0.15s ease;
+  --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Reset ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+[data-theme="light"] html,
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+/* ── Shared Button Styles ────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: var(--accent-cyan);
+  color: #0a1628;
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-smooth);
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 0 24px rgba(0, 255, 231, 0.25);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(0, 255, 231, 0.4);
+  filter: brightness(1.05);
+}
+
+[data-theme="light"] .btn-primary {
+  box-shadow: 0 4px 16px rgba(0, 184, 164, 0.3);
+  color: #fff;
+}
+
+[data-theme="light"] .btn-primary:hover {
+  box-shadow: 0 8px 28px rgba(0, 184, 164, 0.45);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-smooth);
+  white-space: nowrap;
+}
+
+.btn-ghost:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  background: rgba(0, 255, 231, 0.05);
+  transform: translateY(-2px);
+}
+
+[data-theme="light"] .btn-ghost:hover {
+  background: rgba(0, 184, 164, 0.07);
+}
+
+/* ── Shared Typography ───────────────────────────────────── */
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 80px);
+  letter-spacing: 0.04em;
+  line-height: 0.95;
+  color: var(--text-primary);
+}
+
+.section-subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.8;
+}
+
+.label-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent-cyan) 0%, #00aaff 45%, var(--accent-violet) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ── Shared Keyframes ────────────────────────────────────── */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float-y {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-20px); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+@keyframes pulse-ring {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes scan-line {
+  0%   { top: -2px; }
+  100% { top: 100%; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
